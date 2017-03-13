@@ -106,21 +106,52 @@ clf_xgb = xgb.XGBClassifier(
 #print("Best parameters: {}".format(grid.best_params_))
 #print("Best cross-validation score (ROC_AUC): {:.2f}".format(grid.best_score_))
 
-#New record! 0.8836
+
+# Best classifier:
+#clf_vot = VotingClassifier(
+#            [
+#                ('extra', ExtraTreesClassifier(n_estimators=1024, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
+#                ('rf', RandomForestClassifier(
+#                        n_estimators=1024, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
+#                ),
+#                ('gradboost', GradientBoostingClassifier(n_estimators=1024, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2)),
+#                ('xgboost', xgb.XGBClassifier(
+#                        n_estimators=1024, 
+#                        max_depth=8, 
+#                        silent=True, 
+#                        objective="binary:logistic",
+#                        learning_rate=0.01,
+#                        min_child_weight=2,
+#                        nthread=1,
+#                        gamma=0,
+#                        subsample=0.8,
+#                        colsample_bytree=0.9,
+#                        reg_lambda=1,
+#                        reg_alpha=0))
+#
+#            ], voting='soft')
+#
+##New record! 0.88396
+#clf_pipe = make_pipeline (
+#    StandardScaler(),
+#    clf_vot
+#)
+
+
 
 clf_vot = VotingClassifier(
             [
-                ('extra', ExtraTreesClassifier(n_estimators=512, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf =2)),
+                ('extra', ExtraTreesClassifier(n_estimators=1024, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
                 ('rf', RandomForestClassifier(
-                        n_estimators=512, n_jobs=-1, max_features=0.1, criterion='entropy', bootstrap=True)
+                        n_estimators=1024, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
                 ),
-                ('gradboost', GradientBoostingClassifier(n_estimators=512, max_depth=6, learning_rate=0.1 , max_features="sqrt")),
+                ('gradboost', GradientBoostingClassifier(n_estimators=1024, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2)),
                 ('xgboost', xgb.XGBClassifier(
-                        n_estimators=512, 
+                        n_estimators=1024, 
                         max_depth=8, 
                         silent=True, 
                         objective="binary:logistic",
-                        learning_rate=0.05,
+                        learning_rate=0.01,
                         min_child_weight=2,
                         nthread=1,
                         gamma=0,
@@ -129,8 +160,9 @@ clf_vot = VotingClassifier(
                         reg_lambda=1,
                         reg_alpha=0))
 
-            ], voting='soft', weights=[1, 1, 1, 1])
+            ], voting='soft')
 
+#New record! 0.88396
 clf_pipe = make_pipeline (
     StandardScaler(),
     clf_vot
@@ -144,5 +176,5 @@ clf_pipe = make_pipeline (
 #run.publish()
 #print("Uploaded run with id %s. Check it at www.openml.org/r/%s" %(run.run_id,run.run_id))
 
-a = cross_val_score(clf_pipe, X, y, cv=10, scoring='roc_auc', n_jobs=5, verbose=3)
+a = cross_val_score(clf_pipe, X, y, cv=task.iterate_all_splits(), scoring='roc_auc', n_jobs=5, verbose=3)
 print(a, a.mean())
