@@ -138,7 +138,7 @@ clf_xgb = xgb.XGBClassifier(
 #)
 
 
-
+# New record! 0.88572
 clf_vot = VotingClassifier(
             [
                 ('extra', ExtraTreesClassifier(n_estimators=1024, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
