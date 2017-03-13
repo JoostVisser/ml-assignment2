@@ -110,13 +110,13 @@ clf_xgb = xgb.XGBClassifier(
 # Best classifier:
 #clf_vot = VotingClassifier(
 #            [
-#                ('extra', ExtraTreesClassifier(n_estimators=1024, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
+#                ('extra', ExtraTreesClassifier(n_estimators=2048, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
 #                ('rf', RandomForestClassifier(
-#                        n_estimators=1024, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
+#                        n_estimators=2048, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
 #                ),
-#                ('gradboost', GradientBoostingClassifier(n_estimators=1024, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2)),
+#                ('gradboost', GradientBoostingClassifier(n_estimators=2048, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2)),
 #                ('xgboost', xgb.XGBClassifier(
-#                        n_estimators=1024, 
+#                        n_estimators=2048, 
 #                        max_depth=8, 
 #                        silent=True, 
 #                        objective="binary:logistic",
@@ -145,20 +145,21 @@ clf_vot = VotingClassifier(
                 ('rf', RandomForestClassifier(
                         n_estimators=1024, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
                 ),
-                ('gradboost', GradientBoostingClassifier(n_estimators=1024, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2)),
+                ('gradboost', GradientBoostingClassifier(n_estimators=1024, max_depth=8, learning_rate=0.03 , max_features="sqrt", min_samples_leaf=2)),
                 ('xgboost', xgb.XGBClassifier(
                         n_estimators=1024, 
                         max_depth=8, 
                         silent=True, 
                         objective="binary:logistic",
-                        learning_rate=0.01,
+                        learning_rate=0.03,
                         min_child_weight=2,
                         nthread=1,
                         gamma=0,
                         subsample=0.8,
                         colsample_bytree=0.9,
                         reg_lambda=1,
-                        reg_alpha=0))
+                        reg_alpha=0)
+                )
 
             ], voting='soft')
 
