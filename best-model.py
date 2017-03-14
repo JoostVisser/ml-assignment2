@@ -25,9 +25,10 @@ from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, Gradi
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.decomposition import PCA
-from sklearn.model_selection import GridSearchCV 
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
+import itertools
 import xmltodict
 
 # 500 gives 0.852, 200 gives 0.849, 0.850
@@ -65,6 +66,59 @@ import xmltodict
 #        ]
 #)
 #
+#xgb_grid = {
+#        'vot__weights': [list((i+1, j+1, k+1, l+1)) for i, j, k, l in itertools.product(range(4), range(4), range(4), range(4))]
+#}
+
+clf_grid = {
+        'vot__weights': [[1, 2, 2, 3], [1, 1, 1, 1]]
+}
+#
+## New record! 0.88572
+#clf_vot = VotingClassifier(
+#            [
+#                ('extra', ExtraTreesClassifier(n_estimators=512, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
+#                ('rf', RandomForestClassifier(
+#                        n_estimators=512, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
+#                ),
+#                ('gradboost', GradientBoostingClassifier(n_estimators=512, max_depth=8, learning_rate=0.05 , max_features="sqrt", min_samples_leaf=2)),
+#                ('xgboost', xgb.XGBClassifier(
+#                        n_estimators=512, 
+#                        max_depth=8, 
+#                        silent=True, 
+#                        objective="binary:logistic",
+#                        learning_rate=0.05,
+#                        min_child_weight=2,
+#                        nthread=1,
+#                        gamma=0,
+#                        subsample=0.8,
+#                        colsample_bytree=0.9,
+#                        reg_lambda=1,
+#                        reg_alpha=0)
+#                )
+#
+#            ], voting='soft')
+#
+##New record! 0.88396s
+#clf_pipe = Pipeline ( [
+#    ('stsc', StandardScaler()),
+#    ('vot', clf_vot)
+#    ]
+#)
+#
+#grid = GridSearchCV(clf_pipe, param_distributions=clf_grid, cv=10, n_jobs=8, verbose=2, scoring='roc_auc')
+#grid.fit(X, y)
+#
+#print()
+#print(grid.cv_results_)
+#
+#print("Mean test score: " + str(grid.cv_results_["mean_test_score"]))
+#print("Best parameters: {}".format(grid.best_params_))
+#print("Best cross-validation score (ROC_AUC): {:.2f}".format(grid.best_score_))
+
+## RESULTS: 1, 2, 2, 3
+
+
 #
 # Results parameter tuning:
 # max_depth = 8
@@ -78,19 +132,19 @@ import xmltodict
 # Higher n_estimators? --> Lower learning rates
 
 # 0.8796 with learning_rate 0.01, or 0.05
-clf_xgb = xgb.XGBClassifier(
-                        n_estimators=512, 
-                        max_depth=8, 
-                        silent=True, 
-                        objective="binary:logistic",
-                        learning_rate=0.01,
-                        min_child_weight=2,
-                        nthread=1,
-                        gamma=0,
-                        subsample=0.8,
-                        colsample_bytree=0.9,
-                        reg_lambda=1,
-                        reg_alpha=0)
+#clf_xgb = xgb.XGBClassifier(
+#                        n_estimators=512, 
+#                        max_depth=8, 
+#                        silent=True, 
+#                        objective="binary:logistic",
+#                        learning_rate=0.01,
+#                        min_child_weight=2,
+#                        nthread=1,
+#                        gamma=0,
+#                        subsample=0.8,
+#                        colsample_bytree=0.9,
+#                        reg_lambda=1,
+#                        reg_alpha=0)
 
 #xgb_grid = {
 #        'xgboost__learning_rate': [0.01, 0.05, 0.1, 0.15],
@@ -137,45 +191,62 @@ clf_xgb = xgb.XGBClassifier(
 #    clf_vot
 #)
 
+etc = ExtraTreesClassifier (
+    n_estimators=1024, 
+    criterion='entropy', 
+    bootstrap=True, 
+    max_features="sqrt", 
+    min_samples_leaf=2
+)
+
+rfc = RandomForestClassifier (
+    n_estimators=1024, 
+    n_jobs=1,
+    max_features=0.1, 
+    criterion='entropy', 
+    bootstrap=True, 
+    min_samples_leaf=2
+)
+
+gbc = GradientBoostingClassifier (
+    n_estimators=1024, max_depth=8, learning_rate=0.03 , max_features="sqrt", min_samples_leaf=2
+)
+
+xgb = xgb.XGBClassifier (
+        n_estimators=1024, 
+        max_depth=8, 
+        silent=True, 
+        objective="binary:logistic",
+        learning_rate=0.03,
+        min_child_weight=2,
+        nthread=1,
+        gamma=0,
+        subsample=0.8,
+        colsample_bytree=0.9,
+        reg_lambda=1,
+        reg_alpha=0
+)
 
 # New record! 0.88572
 clf_vot = VotingClassifier(
             [
-                ('extra', ExtraTreesClassifier(n_estimators=1024, criterion='entropy', bootstrap=True, max_features="sqrt", min_samples_leaf=2)),
-                ('rf', RandomForestClassifier(
-                        n_estimators=1024, n_jobs=1, max_features=0.1, criterion='entropy', bootstrap=True, min_samples_leaf=2)
-                ),
-                ('gradboost', GradientBoostingClassifier(n_estimators=1024, max_depth=8, learning_rate=0.03 , max_features="sqrt", min_samples_leaf=2)),
-                ('xgboost', xgb.XGBClassifier(
-                        n_estimators=1024, 
-                        max_depth=8, 
-                        silent=True, 
-                        objective="binary:logistic",
-                        learning_rate=0.03,
-                        min_child_weight=2,
-                        nthread=1,
-                        gamma=0,
-                        subsample=0.8,
-                        colsample_bytree=0.9,
-                        reg_lambda=1,
-                        reg_alpha=0)
-                )
+               # ('estimators', etc),
+                ('voting', rfc),
+                ('weights', gbc),
+                ('n_jobs',  xgb)
 
-            ], voting='soft')
+            ], voting='soft', n_jobs=-1)
 
-#New record! 0.88396
+#New record! 0.88396s
 clf_pipe = make_pipeline (
     StandardScaler(),
     clf_vot
 )
 
 
+run = runs.run_task(task, clf_pipe)
+run.publish()
+print("Uploaded run with id %s. Check it at www.openml.org/r/%s" %(run.run_id,run.run_id))
 #
-#
-#
-#run = runs.run_task(task, clf_pipe)
-#run.publish()
-#print("Uploaded run with id %s. Check it at www.openml.org/r/%s" %(run.run_id,run.run_id))
-
-a = cross_val_score(clf_pipe, X, y, cv=task.iterate_all_splits(), scoring='roc_auc', n_jobs=5, verbose=3)
-print(a, a.mean())
+#a = cross_val_score(clf_pipe, X, y, cv=task.iterate_all_splits(), scoring='roc_auc', n_jobs=5, verbose=3)
+#print(a, a.mean())
