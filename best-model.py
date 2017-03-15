@@ -198,7 +198,7 @@ etc = ExtraTreesClassifier (
 )
 
 rfc = RandomForestClassifier (
-    n_estimators=1024, 
+    n_estimators=2048, 
     n_jobs=1,
     max_features=0.1, 
     criterion='entropy', 
@@ -207,15 +207,15 @@ rfc = RandomForestClassifier (
 )
 
 gbc = GradientBoostingClassifier (
-    n_estimators=1024, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2
+    n_estimators=2048, max_depth=8, learning_rate=0.0075 , max_features="sqrt", min_samples_leaf=2
 )
 
 xgb = xgb.XGBClassifier (
-        n_estimators=1024, 
+        n_estimators=2048, 
         max_depth=8, 
         silent=True, 
         objective="binary:logistic",
-        learning_rate=0.01,
+        learning_rate=0.0075,
         min_child_weight=2,
         nthread=1,
         gamma=0,
