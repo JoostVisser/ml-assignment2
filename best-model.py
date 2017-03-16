@@ -198,8 +198,8 @@ etc = ExtraTreesClassifier (
 )
 
 rfc = RandomForestClassifier (
-    n_estimators=2048, 
-    n_jobs=1,
+    n_estimators=1024, 
+    n_jobs=-1,
     max_features=0.1, 
     criterion='entropy', 
     bootstrap=True, 
@@ -207,15 +207,26 @@ rfc = RandomForestClassifier (
 )
 
 gbc = GradientBoostingClassifier (
-    n_estimators=2048, max_depth=8, learning_rate=0.0075 , max_features="sqrt", min_samples_leaf=2
+    n_estimators=1024, max_depth=8, learning_rate=0.01 , max_features="sqrt", min_samples_leaf=2
+)
+
+__version__ = 1
+
+class SecondGradientBoostingClassifier (GradientBoostingClassifier):
+    def hello():
+        print("Mine turtle")
+        
+
+gbc2 = SecondGradientBoostingClassifier (
+    n_estimators=1024, max_depth=8, learning_rate=0.02 , max_features="sqrt", min_samples_leaf=2
 )
 
 xgb = xgb.XGBClassifier (
-        n_estimators=2048, 
+        n_estimators=1024, 
         max_depth=8, 
         silent=True, 
         objective="binary:logistic",
-        learning_rate=0.0075,
+        learning_rate=0.02,
         min_child_weight=2,
         nthread=1,
         gamma=0,
@@ -231,9 +242,10 @@ clf_vot = VotingClassifier(
                # ('estimators', etc),
                 ('voting', rfc),
                 ('weights', gbc),
-                ('n_jobs',  xgb)
+                ('n_jobs', gbc2),
+#                ('n_jobs',  xgb)
 
-            ], voting='soft', n_jobs=-1)
+            ], voting='soft', n_jobs=-1, weights=[2,3,3])
 
 #New record! 0.8866
 clf_pipe = make_pipeline (
@@ -241,10 +253,10 @@ clf_pipe = make_pipeline (
     clf_vot
 )
 
-#a = cross_val_score(clf_pipe, X, y, cv=task.iterate_all_splits(), scoring='roc_auc', n_jobs=5, verbose=3)
-#print(a, a.mean())
-#
-#
-run = runs.run_task(task, clf_pipe)
-run.publish()
-print("Uploaded run with id %s. Check it at www.openml.org/r/%s" %(run.run_id,run.run_id))
+a = cross_val_score(clf_pipe, X, y, cv=task.iterate_all_splits(), scoring='roc_auc', n_jobs=5, verbose=3)
+print(a, a.mean())
+
+
+#run = runs.run_task(task, clf_pipe)
+#run.publish()
+#print("Uploaded run with id %s. Check it at www.openml.org/r/%s" %(run.run_id,run.run_id))
